@@ -1,0 +1,6 @@
+@LocalTouristPlanner_HostAddress = http://localhost:5069
+
+GET {{LocalTouristPlanner_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

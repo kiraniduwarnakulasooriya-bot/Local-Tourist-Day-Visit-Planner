@@ -1,0 +1,285 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Tourist Planner</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="index.html">Tourist Day Planner</a>
+            <a href="index.html" class="btn btn-outline-light fw-bold">Back to Home</a>
+        </div>
+    </nav>
+
+    <div class="container pb-4">
+        <h2 class="text-center mb-4 text-danger fw-bold">Admin Management Dashboard</h2>
+
+        <!-- Login Card -->
+        <div id="loginSection" class="card p-4 shadow-sm mx-auto" style="max-width: 400px;">
+            <h4 class="mb-3 text-center fw-bold">Admin Login</h4>
+            <div class="mb-3">
+                <label class="fw-semibold">Username</label>
+                <input type="text" id="adminUser" class="form-control" placeholder="Enter username">
+            </div>
+            <div class="mb-3">
+                <label class="fw-semibold">Password</label>
+                <input type="password" id="adminPass" class="form-control" placeholder="Enter password">
+            </div>
+            <button class="btn btn-danger w-100 fw-bold" onclick="loginAdmin()">Login</button>
+        </div>
+
+        <!-- Dashboard Content (Hidden by default) -->
+        <div id="dashboardSection" class="d-none">
+            <div class="row g-4">
+                <!-- Add New Attraction Form -->
+                <div class="col-md-5">
+                    <div class="card p-3 shadow-sm border-0">
+                        <h5 class="fw-bold mb-3">Add New Attraction</h5>
+                        <div class="mb-2"><input type="text" id="name" class="form-control" placeholder="Place Name"></div>
+                        <div class="mb-2">
+                            <select id="categoryId" class="form-select">
+                                <option value="1">Religious</option>
+                                <option value="2">Historical</option>
+                                <option value="3">Nature</option>
+                                <option value="4">Viewpoint</option>
+                                <option value="5">Recreational</option>
+                            </select>
+                        </div>
+                        <div class="mb-2"><input type="number" step="0.1" id="distanceKm" class="form-control" placeholder="Distance (km)"></div>
+                        <div class="mb-2"><textarea id="description" class="form-control" placeholder="Description"></textarea></div>
+                        <div class="mb-2"><input type="text" id="openingHours" class="form-control" placeholder="Opening Hours (e.g. 06:00 AM - 06:00 PM)"></div>
+                        <div class="mb-2"><input type="text" id="mapLink" class="form-control" placeholder="Google Maps Link"></div>
+                        <button class="btn btn-success w-100 fw-bold" onclick="addAttraction()">Save Attraction</button>
+                    </div>
+                </div>
+
+                <!-- Attractions Table -->
+                <div class="col-md-7">
+                    <div class="card p-3 shadow-sm border-0">
+                        <h5 class="fw-bold mb-3">Manage Existing Places</h5>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Category</th>
+                                        <th>Distance</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Attraction Modal Popup -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title fw-bold" id="editModalLabel">Edit Attraction Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editForm">
+                        <input type="hidden" id="editId">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Attraction Name</label>
+                                <input type="text" id="editName" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Category</label>
+                                <select id="editCategory" class="form-select" required>
+                                    <option value="1">Religious</option>
+                                    <option value="2">Historical</option>
+                                    <option value="3">Nature</option>
+                                    <option value="4">Viewpoint</option>
+                                    <option value="5">Recreational</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Description</label>
+                            <textarea id="editDescription" class="form-control" rows="3" required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Distance (km)</label>
+                                <input type="number" step="0.1" id="editDistance" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Opening Hours</label>
+                                <input type="text" id="editHours" class="form-control">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-2"><input type="text" id="editImg1" class="form-control" placeholder="Image 1 Path"></div>
+                            <div class="col-md-4 mb-2"><input type="text" id="editImg2" class="form-control" placeholder="Image 2 Path"></div>
+                            <div class="col-md-4 mb-2"><input type="text" id="editImg3" class="form-control" placeholder="Image 3 Path"></div>
+                            <div class="col-md-6 mb-2"><input type="text" id="editImg4" class="form-control" placeholder="Image 4 Path"></div>
+                            <div class="col-md-6 mb-2"><input type="text" id="editImg5" class="form-control" placeholder="Image 5 Path"></div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-warning fw-bold" onclick="saveUpdate()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Admin Operations JavaScript Logic -->
+    <script>
+        let allAdminAttractions = [];
+
+        async function loginAdmin() {
+            const username = document.getElementById('adminUser').value;
+            const password = document.getElementById('adminPass').value;
+
+            if (!username || !password) {
+                return alert('Please fill in both username and password!');
+            }
+
+            const res = await fetch('/api/admin/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (res.ok) {
+                document.getElementById('loginSection').classList.add('d-none');
+                document.getElementById('dashboardSection').classList.remove('d-none');
+                loadAdminAttractions();
+            } else {
+                alert('Invalid Admin Credentials!');
+            }
+        }
+
+        async function loadAdminAttractions() {
+            const res = await fetch('/api/attractions/search');
+            allAdminAttractions = await res.json();
+            const tbody = document.getElementById('adminTableBody');
+            tbody.innerHTML = '';
+
+            allAdminAttractions.forEach((item, index) => {
+                tbody.innerHTML += `
+                        <tr>
+                            <td><b>${item.name}</b></td>
+                            <td><span class="badge bg-secondary">${item.categoryName || 'General'}</span></td>
+                            <td>~${item.distanceKm} km</td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-warning me-1 fw-bold" onclick="openEditModalByIndex(${index})">✏️ Edit</button>
+                                <button class="btn btn-sm btn-outline-danger fw-bold" onclick="deleteAttraction(${item.attractionId})">🗑️ Delete</button>
+                            </td>
+                        </tr>`;
+            });
+        }
+
+        function openEditModalByIndex(index) {
+            const item = allAdminAttractions[index];
+            if (!item) return;
+
+            document.getElementById('editId').value = item.attractionId;
+            document.getElementById('editName').value = item.name;
+            document.getElementById('editCategory').value = item.categoryId;
+            document.getElementById('editDescription').value = item.description || '';
+            document.getElementById('editDistance').value = item.distanceKm;
+            document.getElementById('editHours').value = item.openingHours || '';
+            document.getElementById('editImg1').value = item.image1 || '';
+            document.getElementById('editImg2').value = item.image2 || '';
+            document.getElementById('editImg3').value = item.image3 || '';
+            document.getElementById('editImg4').value = item.image4 || '';
+            document.getElementById('editImg5').value = item.image5 || '';
+
+            var editModal = new bootstrap.Modal(document.getElementById('editModal'));
+            editModal.show();
+        }
+
+        async function saveUpdate() {
+            const idVal = parseInt(document.getElementById('editId').value) || 0;
+
+            // Clean Payload matching C# Model Property Names
+            const updatedData = {
+                attractionId: idVal,
+                name: document.getElementById('editName').value || '',
+                categoryId: parseInt(document.getElementById('editCategory').value) || 1,
+                description: document.getElementById('editDescription').value || '',
+                distanceKm: parseFloat(document.getElementById('editDistance').value) || 0.0,
+                openingHours: document.getElementById('editHours').value || '',
+                locationMapLink: 'https://maps.google.com',
+                image1: document.getElementById('editImg1').value || '',
+                image2: document.getElementById('editImg2').value || '',
+                image3: document.getElementById('editImg3').value || '',
+                image4: document.getElementById('editImg4').value || '',
+                image5: document.getElementById('editImg5').value || ''
+            };
+
+            try {
+                const res = await fetch('/api/attractions/update', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedData)
+                });
+
+                if (res.ok) {
+                    alert('Attraction updated successfully!');
+                    const modalElement = document.getElementById('editModal');
+                    const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                    if (modalInstance) modalInstance.hide();
+                    loadAdminAttractions();
+                } else {
+                    const errData = await res.json().catch(() => ({}));
+                    console.error('Validation Response:', errData);
+                    alert('Failed to update: ' + (errData.title || errData.message || 'Validation Error'));
+                }
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+
+        async function addAttraction() {
+            const model = {
+                name: document.getElementById('name').value,
+                categoryId: parseInt(document.getElementById('categoryId').value),
+                distanceKm: parseFloat(document.getElementById('distanceKm').value),
+                description: document.getElementById('description').value,
+                openingHours: document.getElementById('openingHours').value,
+                locationMapLink: document.getElementById('mapLink').value
+            };
+
+            const res = await fetch('/api/admin/attraction', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(model)
+            });
+
+            if (res.ok) {
+                alert('Attraction added successfully!');
+                loadAdminAttractions();
+            }
+        }
+
+        async function deleteAttraction(id) {
+            if (confirm('Are you sure you want to delete this attraction?')) {
+                await fetch(`/api/admin/attraction/${id}`, { method: 'DELETE' });
+                loadAdminAttractions();
+            }
+        }
+    </script>
+</body>
+</html>
